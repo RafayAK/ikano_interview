@@ -1,3 +1,40 @@
+# IDE & Editor
 .idea
+.vscode
+*.swp
+*.swo
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.venv/
+*.egg-info/
+dist/
+build/
 
+# Node & Frontend
+node_modules/
+frontend/dist/
+frontend/.astro/
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.auto.tfvars
+terraform.tfvars
+secrets.tfvars
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
