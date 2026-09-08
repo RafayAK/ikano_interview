@@ -1,0 +1,70 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Result — Ikano">
+  <h1 id="result-title" class="text-2xl font-semibold">Loading…</h1>
+  <p id="result-detail" class="mt-2 text-sm text-slate-600"></p>
+
+  <ul id="reasons" class="mt-4 flex flex-col gap-1 text-sm text-slate-700"></ul>
+
+  <h2 class="mt-8 text-lg font-semibold">Audit trail</h2>
+  <ul id="audit-events" class="mt-3 flex flex-col gap-1 text-xs text-slate-500"></ul>
+</Layout>
+
+<script>
+  import { getApplication, getAuditEvents } from "../../lib/api.js";
+
+  const STATUS_STYLES = {
+    approved: "text-green-700",
+    manual_review: "text-amber-700",
+    rejected: "text-red-700",
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const applicationId = params.get("id");
+
+  const titleEl = document.querySelector("#result-title");
+  const detailEl = document.querySelector("#result-detail");
+  const reasonsEl = document.querySelector("#reasons");
+  const auditEl = document.querySelector("#audit-events");
+
+  async function load() {
+    if (!applicationId) {
+      window.location.href = "/";
+      return;
+    }
+
+    const [application, events] = await Promise.all([
+      getApplication(applicationId),
+      getAuditEvents(applicationId),
+    ]);
+
+    if (application.status === "in_progress") {
+      window.location.href = `/step/?id=${applicationId}`;
+      return;
+    }
+
+    titleEl.textContent = application.status.replace("_", " ").toUpperCase();
+    titleEl.className = `text-2xl font-semibold ${STATUS_STYLES[application.status] ?? ""}`;
+    detailEl.textContent = `Application ${application.id} — ${application.country}, ${application.customer_type}`;
+
+    for (const reason of application.decision_reasons ?? []) {
+      const li = document.createElement("li");
+      li.textContent = `• ${reason.replaceAll("_", " ")}`;
+      reasonsEl.append(li);
+    }
+
+    for (const event of events) {
+      const li = document.createElement("li");
+      const parts = [event.event_type];
+      if (event.step_id) parts.push(`step=${event.step_id}`);
+      if (event.integration) parts.push(`integration=${event.integration}`);
+      if (event.outcome) parts.push(`outcome=${event.outcome}`);
+      li.textContent = `${new Date(event.occurred_at).toLocaleString()} — ${parts.join(" ")}`;
+      auditEl.append(li);
+    }
+  }
+
+  load();
+</script>

@@ -1,0 +1,93 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Onboarding step — Ikano">
+  <div id="progress" class="mb-6"></div>
+
+  <h1 id="step-title" class="text-2xl font-semibold">Loading…</h1>
+
+  <form id="step-form" class="mt-6 flex flex-col gap-4"></form>
+
+  <p id="error" class="mt-4 hidden text-sm text-red-600"></p>
+
+  <div class="mt-6 flex justify-end">
+    <button
+      form="step-form"
+      type="submit"
+      class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+    >
+      Continue
+    </button>
+  </div>
+</Layout>
+
+<script>
+  import { getApplication, getCurrentStep, putStep } from "../../lib/api.js";
+  import { renderForm, collectFormAnswers } from "../../lib/form-renderer.js";
+  import { renderProgress } from "../../lib/progress.js";
+
+  const params = new URLSearchParams(window.location.search);
+  const applicationId = params.get("id");
+
+  const titleEl = document.querySelector("#step-title");
+  const formEl = document.querySelector("#step-form");
+  const errorEl = document.querySelector("#error");
+  const progressEl = document.querySelector("#progress");
+
+  let currentSchema = null;
+  let currentStepId = null;
+
+  async function load() {
+    if (!applicationId) {
+      window.location.href = "/";
+      return;
+    }
+
+    const [application, step] = await Promise.all([
+      getApplication(applicationId),
+      getCurrentStep(applicationId).catch((err) => {
+        if (err.status === 409) return null; // no current step left — all done
+        throw err;
+      }),
+    ]);
+
+    renderProgress(progressEl, {
+      progress: application.progress,
+      steps: application.steps,
+      currentStepId: step?.id,
+    });
+
+    if (!step) {
+      window.location.href = `/review/?id=${applicationId}`;
+      return;
+    }
+
+    currentSchema = step.schema;
+    currentStepId = step.id;
+    titleEl.textContent = `${step.title} (step ${step.position} of ${step.total_steps})`;
+    renderForm(formEl, step.schema);
+  }
+
+  formEl.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    errorEl.classList.add("hidden");
+
+    const answers = collectFormAnswers(formEl, currentSchema);
+
+    try {
+      await putStep(applicationId, currentStepId, answers);
+      await load();
+    } catch (err) {
+      const detail = err.body?.detail;
+      errorEl.textContent = Array.isArray(detail)
+        ? detail.map((d) => d.msg).join(", ")
+        : typeof detail === "string"
+          ? detail
+          : "Could not save this step. Please check your answers.";
+      errorEl.classList.remove("hidden");
+    }
+  });
+
+  load();
+</script>

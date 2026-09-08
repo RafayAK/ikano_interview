@@ -1,0 +1,64 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Review — Ikano">
+  <div id="progress" class="mb-6"></div>
+
+  <h1 class="text-2xl font-semibold">Review your application</h1>
+  <p class="mt-2 text-sm text-slate-600">
+    All steps are complete. Submit to run the final decision.
+  </p>
+
+  <p id="error" class="mt-4 hidden text-sm text-red-600"></p>
+
+  <div class="mt-6 flex justify-end">
+    <button
+      id="submit-button"
+      type="button"
+      class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+    >
+      Submit application
+    </button>
+  </div>
+</Layout>
+
+<script>
+  import { getApplication, submitApplication } from "../../lib/api.js";
+  import { renderProgress } from "../../lib/progress.js";
+
+  const params = new URLSearchParams(window.location.search);
+  const applicationId = params.get("id");
+
+  const progressEl = document.querySelector("#progress");
+  const errorEl = document.querySelector("#error");
+  const submitButton = document.querySelector("#submit-button");
+
+  async function load() {
+    if (!applicationId) {
+      window.location.href = "/";
+      return;
+    }
+    const application = await getApplication(applicationId);
+    renderProgress(progressEl, { progress: application.progress, steps: application.steps });
+
+    if (application.status !== "in_progress") {
+      window.location.href = `/result/?id=${applicationId}`;
+    }
+  }
+
+  submitButton.addEventListener("click", async () => {
+    errorEl.classList.add("hidden");
+    submitButton.disabled = true;
+    try {
+      await submitApplication(applicationId);
+      window.location.href = `/result/?id=${applicationId}`;
+    } catch (err) {
+      errorEl.textContent = err.body?.detail || "Could not submit the application.";
+      errorEl.classList.remove("hidden");
+      submitButton.disabled = false;
+    }
+  });
+
+  load();
+</script>

@@ -1,0 +1,89 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Start onboarding — Ikano">
+  <h1 class="text-2xl font-semibold">Start your application</h1>
+  <p class="mt-2 text-sm text-slate-600">
+    Select your country and account type to begin.
+  </p>
+
+  <form id="start-form" class="mt-6 flex flex-col gap-4">
+    <div class="flex flex-col gap-1">
+      <label for="country" class="text-sm font-medium text-slate-700">Country</label>
+      <select
+        id="country"
+        name="country"
+        required
+        class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+      >
+        <option value="sweden">Sweden</option>
+        <option value="spain">Spain</option>
+        <option value="poland">Poland</option>
+      </select>
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label for="customer_type" class="text-sm font-medium text-slate-700">Account type</label>
+      <select
+        id="customer_type"
+        name="customer_type"
+        required
+        class="rounded-md border border-slate-300 px-3 py-2 text-sm"
+      >
+        <option value="private">Private individual</option>
+        <option value="business">Business</option>
+      </select>
+    </div>
+
+    <p id="error" class="hidden text-sm text-red-600"></p>
+
+    <button
+      type="submit"
+      class="mt-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+    >
+      Start application
+    </button>
+  </form>
+</Layout>
+
+<script>
+  import { createApplication } from "../lib/api.js";
+
+  const form = document.querySelector("#start-form");
+  const errorEl = document.querySelector("#error");
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    errorEl.classList.add("hidden");
+
+    const data = new FormData(form);
+    try {
+      const application = await createApplication(data.get("country"), data.get("customer_type"));
+      window.location.href = `/step/?id=${application.id}`;
+    } catch (err) {
+      errorEl.textContent = "Could not start the application. Please try again.";
+      errorEl.classList.remove("hidden");
+    }
+  });
+</script>
+
+<script>
+  import { getResume } from "../lib/api.js";
+
+  // Resume in progress applications automatically; a 404 just means no active session.
+  getResume()
+    .then((resumed) => {
+      if (resumed.status !== "in_progress") {
+        window.location.href = `/result/?id=${resumed.application_id}`;
+      } else if (resumed.current_step) {
+        window.location.href = `/step/?id=${resumed.application_id}`;
+      } else {
+        window.location.href = `/review/?id=${resumed.application_id}`;
+      }
+    })
+    .catch(() => {
+      // no resumable application — show the start form as-is
+    });
+</script>
+
