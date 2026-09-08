@@ -29,10 +29,12 @@ terraform.tfvars
 secrets.tfvars
 
 # Terraform
-.terraform/
-.terraform.lock.hcl
+**/.terraform/
+**/.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
+**/*.tfstate
+**/*.tfstate.*
 crash.log
 override.tf
 override.tf.json
