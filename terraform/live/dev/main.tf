@@ -172,6 +172,9 @@ module "app_service" {
   cpu         = var.app_cpu
   memory      = var.app_memory
 
+  autoscaling_min_capacity = var.app_min_capacity
+  autoscaling_max_capacity = var.app_max_capacity
+
   container_definitions = {
     (var.container_name) = {
       cpu       = var.app_cpu

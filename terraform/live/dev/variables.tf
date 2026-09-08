@@ -64,6 +64,18 @@ variable "app_memory" {
   default     = 512
 }
 
+variable "app_min_capacity" {
+  description = "Minimum number of ECS tasks to run"
+  type        = number
+  default     = 1
+}
+
+variable "app_max_capacity" {
+  description = "Maximum number of ECS tasks to run (pinned to 1 for cost-effective evaluation)"
+  type        = number
+  default     = 1
+}
+
 variable "container_name" {
   description = "Name of the application container"
   type        = string

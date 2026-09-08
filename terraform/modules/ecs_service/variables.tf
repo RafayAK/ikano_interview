@@ -64,3 +64,21 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "autoscaling_min_capacity" {
+  description = "Minimum number of tasks to run in the service."
+  type        = number
+  default     = 1
+}
+
+variable "autoscaling_max_capacity" {
+  description = "Maximum number of tasks to run in the service."
+  type        = number
+  default     = 1
+}
+
+variable "desired_count" {
+  description = "Number of instances of the task definition to place and keep running."
+  type        = number
+  default     = 1
+}

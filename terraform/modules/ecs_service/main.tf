@@ -25,5 +25,9 @@ module "ecs_service" {
   security_group_rules = var.security_group_rules
   network_mode         = var.network_mode
 
+  desired_count            = var.desired_count
+  autoscaling_min_capacity = var.autoscaling_min_capacity
+  autoscaling_max_capacity = var.autoscaling_max_capacity
+
   tags = var.tags
 }

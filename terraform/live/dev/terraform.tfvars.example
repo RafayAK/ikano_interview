@@ -7,8 +7,10 @@ vpc_cidr           = "10.0.0.0/16"
 enable_nat_gateway = true # Set false to run tasks in public subnets and save ~$32/month
 
 # Compute (Fargate Spot)
-app_cpu    = 256 # 0.25 vCPU
-app_memory = 512 # 512 MiB
+app_cpu          = 256 # 0.25 vCPU
+app_memory       = 512 # 512 MiB
+app_min_capacity = 1
+app_max_capacity = 1
 
 # Database
 use_managed_rds   = true
