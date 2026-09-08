@@ -1,0 +1,26 @@
+# Environment
+env        = "dev"
+aws_region = "us-east-1"
+
+# Networking
+vpc_cidr           = "10.0.0.0/16"
+enable_nat_gateway = true # Set false to run tasks in public subnets and save ~$32/month
+
+# Compute (Fargate Spot)
+app_cpu    = 256 # 0.25 vCPU
+app_memory = 512 # 512 MiB
+
+# Database
+use_managed_rds   = true
+db_engine_version = "18.3"
+db_instance_class = "db.t4g.micro"
+db_name           = "ikano_onboarding"
+db_username       = "postgres"
+# db_password     = "your-custom-password" # Leave commented to auto-generate a secure random password
+
+# Optional: External database (e.g. Neon or Supabase)
+# use_managed_rds       = false
+# external_database_url = "postgresql+asyncpg://user:pass@ep-xyz.us-east-1.aws.neon.tech/ikano_onboarding?ssl=require"
+
+# Optional: Custom domain HTTPS via AWS ACM
+# certificate_arn      = "arn:aws:acm:us-east-1:123456789012:certificate/xyz"
